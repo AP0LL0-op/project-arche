@@ -9,7 +9,7 @@ Arche defines grounded intelligence as embodied cognition paired with physical e
 
 Transformer architecture is fundamentally incompatible with this concept, yet we are reaching for human intelligence as a benchmark.
 
-This project bets this benchmark will only be reached by a system built the same way we were.
+This project bets that benchmark will only be reached by a system built the same way we were.
 
 ## Status
 
