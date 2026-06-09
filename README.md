@@ -40,7 +40,7 @@ Right now, Project Arche consists of several documents, each containing critical
 
 ## How to Contribute
 
-Right now, I’m still in college, working full-time, and supporting a family. I designed this on my own time, making no money, and alone.
+Currently, I’m still in college, working full-time, and supporting a family. I designed this on my own time, making no money, and alone.
 
 I am learning Python programming at the time of writing this. So I honestly can’t do the project justice the way experienced passionate developers could.
 
