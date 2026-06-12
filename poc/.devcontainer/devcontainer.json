@@ -1,0 +1,15 @@
+{
+    "name": "Arche PoC",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/desktop-lite:1": {}
+    },
+    "forwardPorts": [6080],
+    "portsAttributes": {
+        "6080": {
+            "label": "desktop",
+            "onAutoForward": "openBrowserOnce"
+        }
+    },
+    "postCreateCommand": "pip install -r requirements.txt"
+}
