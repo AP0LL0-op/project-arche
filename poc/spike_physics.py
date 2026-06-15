@@ -15,6 +15,10 @@ world.gravity = (0, 0)
 dt = 1/60
 elapsed = 0
 
+# print the current arbiter contact value
+def print_contact(arbiter):
+    print(arbiter.total_impulse.length)
+
 # shapes
 draw_options = pymunk.pygame_util.DrawOptions(screen)
 
@@ -115,16 +119,19 @@ while running:
     # push to monitor
     pygame.display.flip()
 
-    # limits FPS to 60
-    # dt is delta time in seconds since last frame, used for framerate
-    # independent physics
-    dt = clock.tick(60) / 1000
+    # # limits FPS to 60
+    # # dt is delta time in seconds since last frame, used for framerate
+    # # independent physics
+    # dt = clock.tick(60) / 1000
     
     # oscillate the arm motor
     elapsed += dt
     if elapsed > 4:
         motor.rate = -motor.rate
-        elapsed = 0
+        elapsed = 0    
+
+    # call print_contact function with each_arbiter
+    arm_body.each_arbiter(print_contact)
 
 # quit
 pygame.quit()
