@@ -17,3 +17,10 @@ class World:
         ball_shape.friction = 0.3
         ball_shape.color = (255, 0, 0, 255)
         self.space.add(self.ball_body, ball_shape)
+
+        # the arm anchor
+        self.arm_anchor = pymunk.Body(body_type=pymunk.Body.STATIC)
+        self.arm_anchor.position = (300, 300)
+        arm_anchor_shape = pymunk.Circle(self.arm_anchor, radius=10)
+        arm_anchor_shape.sensor = True
+        self.space.add(self.arm_anchor, arm_anchor_shape)
