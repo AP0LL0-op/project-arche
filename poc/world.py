@@ -62,3 +62,22 @@ class World:
         fixed_wall_segment.elasticity = 1.0
         fixed_wall_segment.friction = 0.3
         self.space.add(fixed_wall_segment)
+
+    # advance the physics by dt seconds
+    def step(self, dt):
+        self.space.step(dt)
+
+    # SimpleMotor spins body b opposite to rate; flip so positive command = positive rotation
+    def apply_motor(self, commands):
+        self.motor.rate = -commands
+
+    def read_sensors(self):
+        contact_total = 0
+        def add_contact(arbiter):
+            nonlocal contact_total
+            contact_total += arbiter.total_impulse.length
+        self.arm_body.each_arbiter(add_contact)
+        return {
+            "angle": self.arm_body.angle, 
+            "angular_velocity": self.arm_body.angular_velocity,
+            "contact": contact_total}
