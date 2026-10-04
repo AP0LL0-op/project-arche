@@ -1,6 +1,6 @@
 **PROJECT ARCHE**
 
-*Architecture Specification — v4.7*
+*Architecture Specification — v4.8*
 
 # **1. Design Principles**
 
@@ -21,6 +21,8 @@ Core architectural commitments:
 - Dependency-driven activation. Components activate when their inputs exist.
 
 - Passive observation. The registry observes the system without influencing it.
+
+- Machinery, not content. The architecture supplies mechanisms — plasticity rules, oscillators, the efference comparator, bandwidth limits. These are designed priors and are named as such. What the mechanisms produce — features, categories, concepts, and the self/world distinction itself — is never designed, labeled, or seeded. No component outputs a category the system is meant to discover.
 
 # **2. Physics Engine Substrate**
 
@@ -56,19 +58,25 @@ Motor output at start is uncalibrated. Force and motor calibration emerge from c
 
 ### **Efference Copy Mechanism**
 
-Self/world boundary generator. Every motor action produces a paired predictive signal simultaneously.
+Self/world boundary generator. Every motor action produces a paired copy of the command simultaneously (corollary discharge). The copy goes to two places.
 
-- Consistent match between predicted and observed outcome produces self attribution.
+- To the forward model, which uses it to predict the sensory consequences of the action.
 
-- Mismatch produces world attribution.
+- Into the sensory input stream, as a trace of recent motor commands — an explicit signal of what the system has been doing (see encoding gap note below).
 
-- Self/world distinction emerges as a consistency pattern from this mechanism. The richer the kinematic chain, the richer this signal.
+Sensation predicted from the command is attenuated in proportion to how well the command predicted it (Section 3.3, Reafference Attenuation). Attenuation is continuous. No component labels any signal as self or world.
+
+Only the command-driven component of prediction is attenuated. Sensory change that is predictable from body state or from regularities of the world — contact with a fixed obstacle at a familiar joint angle, for example — is not attenuated. Being predictable is not the same as being self-caused.
+
+The self/world distinction emerges as a consistency pattern: the portion of sensory change that the system’s own commands reliably predict. It is not computed by any component. It is observed by the registry (Section 6, Anima). The richer the kinematic chain, the richer this signal.
 
 *Depends on: Humanoid body. Motor output across the kinematic chain.*
 
-**Encoding gap and the proprioceptive channel.** The efference copy mechanism generates implicit causal knowledge: the forward model compensates for self-caused prediction error through distributed weight dynamics. This compensation alone does not produce readable self-representation — a system can perfectly predict its own effects without encoding “I am acting” as a distinguishable internal state (Ye 2026, arXiv:2606.05605). The proprioceptive channel (Section 3.2, Kinesthetic / Proprioceptive Force) is what crosses this gap. Joint state and force feedback write action history directly into the sensory input stream, making the system’s own causal activity available as explicit signal rather than implicit compensation. Without proprioception, the self/world boundary exists in the system’s predictive accuracy but is not readable from its internal state. With it, the boundary becomes a representable feature. Proprioception is therefore architecturally load-bearing for self/world boundary resolution, not merely an additional sensory channel.
+**Encoding gap and the command trace.** The forward model generates implicit causal knowledge: it compensates for self-caused prediction error through distributed weight dynamics. This compensation alone does not produce readable self-representation — a system can perfectly predict its own effects without encoding “I am acting” as a distinguishable internal state (Ye 2026, arXiv:2606.05605). In Ye’s system the gap was crossed by feeding a trace of the system’s own action back in as input. A channel carrying the action’s consequences was already present and did not cross it. Arche therefore routes a trace of recent motor commands into the sensory input stream, so the system’s own causal activity is available as explicit signal rather than only as implicit compensation. Biologically this is corollary discharge reaching sensory areas.
 
-*Depends on: Kinesthetic / Proprioceptive Force (Section 3.2). The efference copy generates the boundary; proprioception makes it legible.*
+Joint state and force feedback (Section 3.2) remain essential: they report the consequences against which the command’s predictions are checked. Whether joint-state proprioception alone would also cross the encoding gap in a rich body is untested. It is an open question, examined by ablation in the efference proof of concept.
+
+*Depends on: Kinesthetic / Proprioceptive Force (Section 3.2). The efference copy generates the boundary; the command trace makes it legible; proprioception supplies the consequences it is checked against.*
 
 ## **3.2 Sensory Primitives**
 
@@ -94,7 +102,7 @@ Resistance to applied force and joint state across the kinematic chain. Inertial
 
 *Depends on: Articulated body. Genesis rigid body dynamics.*
 
-**Architectural role.** This channel serves a dual function. As a sensory primitive, it provides limb position and force data for motor calibration and physical interaction. As a companion to the efference copy mechanism (Section 3.1), it is the architectural pathway through which implicit causal knowledge becomes explicit self-representation. This second role is not decorative — it is a prerequisite for the self/world boundary to be readable in the system’s activation state rather than buried in weight dynamics. See Section 3.1, encoding gap note.
+**Architectural role.** This channel serves a dual function. As a sensory primitive, it provides limb position and force data for motor calibration and physical interaction. As the companion to the efference copy mechanism (Section 3.1), it is the consequence side of the self/world comparison: the command predicts, proprioception reports. Without it there is nothing reliable to check self-caused predictions against. Whether joint state also carries enough action history to make the boundary readable on its own, without the command trace, is an open question. See Section 3.1, encoding gap note.
 
 ### **Static and Dynamic Contact Force**
 
@@ -146,9 +154,9 @@ Sensory channels feed the predictive core at different rates, and this asymmetry
 
 *Depends on: Render throughput measured on target hardware.*
 
-### **Self/World Tagging**
+### **Reafference Attenuation**
 
-Efference copy signal tags incoming sensory data as self-generated or externally-driven. Applies across all channels, including self-caused visual change (e.g., a limb or hair moving in the visual field).
+Sensory data predicted from the efference copy is attenuated before it enters the competition for bandwidth, in proportion to the command-driven prediction. Self-caused sensation therefore tends to be less salient than equivalent world-caused sensation, as in biology. Applies across all channels, including self-caused visual change (e.g., a limb or hair moving in the visual field). Attenuation is continuous and carries no self/world label. The distinction is left to emerge (Section 3.1) and to be observed by the registry (Section 6).
 
 *Depends on: Efference copy mechanism.*
 
@@ -410,7 +418,7 @@ Seconds timescale. Active contents of current predictive processing. Limited cap
 
 ### **Episodic Memory**
 
-Minutes to days. Physical event traces with sensory features, efference copy tags, prediction errors, and arousal at encoding. Arousal at encoding determines trace strength. Prospective simulation output wired to the significance encoder.
+Minutes to days. Physical event traces with sensory features, efference copy context (command trace and attenuation level), prediction errors, and arousal at encoding. Arousal at encoding determines trace strength. Prospective simulation output wired to the significance encoder.
 
 *Depends on: Working memory contents. Internal state (arousal level).*
 
@@ -536,7 +544,7 @@ Environment exists. Body exists. Physics runs. Core loop active. Bandwidth ceili
 
 **Anima**
 
-Registry observes systematic differences between self-generated and externally-driven prediction errors. Efference copy consistency patterns demonstrate that the self/world boundary has begun resolving. Concept candidates may begin appearing in unstable form.
+Registry observes systematic differences between self-generated and externally-driven prediction errors, and the self/world distinction becomes decodable from the predictive core’s internal state — scored by the registry against ground truth the system never sees, and above a yoked control whose actions are not causal. Efference copy consistency patterns demonstrate that the self/world boundary has begun resolving. Concept candidates may begin appearing in unstable form.
 
 **Substrate**
 
@@ -569,6 +577,23 @@ Registry logs behavior with no seeding interaction. Self-directed exploration an
 - Ubuntu 26.04 LTS — operating system. Requires a libxml2 symlink for Genesis AMD-backend JIT compilation (see Development Log).
 
 # **8. Changelog**
+
+**v4.8 — Self/world boundary as emergent, not labeled**
+
+- Section 1: added the commitment “Machinery, not content.” Mechanisms are designed priors and are named as such; categories, including self/world, are never designed or labeled.
+
+- Section 3.1 Efference Copy Mechanism: rewritten. The efference copy goes to the forward model and, as a command trace, into the sensory stream. Self/world attribution is no longer produced by a component; the distinction emerges as a consistency pattern and is observed by the registry. Only command-driven prediction is attenuated: predictable is not the same as self-caused.
+
+- Section 3.1 encoding gap note: corrected. Ye (2026) crossed the encoding gap with an action trace fed back as input, not with consequence sensing, which was already present. v4.7 attributed the crossing to joint-state proprioception, which Ye did not test. Arche now routes a command trace into the sensory stream; whether joint state alone suffices is recorded as an open question.
+
+- Section 3.2 Kinesthetic / Proprioceptive Force: architectural role revised. Proprioception is the consequence side of the self/world comparison, not the mechanism that crosses the encoding gap.
+
+- Section 3.3: Self/World Tagging replaced by Reafference Attenuation. Continuous attenuation of command-predicted sensation; no labels. Resolves a contradiction between v4.7’s Section 3.1 (distinction emerges) and Section 3.3 (efference copy tags).
+
+- Section 3.6: episodic traces store efference copy context instead of tags.
+
+- Section 6 Anima: the boundary is evidenced by decodability from internal state, scored against ground truth and above a yoked control.
+
 
 **v4.7 — Proprioception as load-bearing mechanism for self/world boundary legibility**
 
@@ -616,4 +641,4 @@ Registry logs behavior with no seeding interaction. Self-directed exploration an
 
 - Document restructured around functional components and dependency relationships. Phases relocated to Section 6 as registry observation baseline.
 
-*Project Arche — Architecture Specification v4.7*
+*Project Arche — Architecture Specification v4.8*

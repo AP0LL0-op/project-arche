@@ -1,6 +1,6 @@
 **PROJECT ARCHE**
 
-*Prior Work and Positioning — Research Report v3.0*
+*Prior Work and Positioning — Research Report v3.1*
 
 *Prepared by Claude for Vincent**’**s review. Source material for the Positioning section of the Research Hypothesis Document.*
 
@@ -300,7 +300,7 @@ An independent research paper (Evan Ye, arXiv:2606.05605, June 2026) that empiri
 
 **What it does**
 
-The paper introduces a developmental sequence, adding components one at a time to a predictive system and tracking whether self-world decomposition emerges. The GRU functions as a fixed reservoir in the key experiments (weights frozen, zero gradient into recurrent state). Only readout heads are trained. The central finding is the encoding gap: a system can perfectly compensate for its own actions in prediction while failing to encode “I am acting” as a readable internal state. Four conditions cross this gap in strict order: (1) persistent state forming stable attractors, (2) a causal action loop linking output to input, (3) proprioceptive feedback that makes implicit causal knowledge explicit, and (4) asynchronous awakening — perceptual learning consolidating before action learning. The paper proposes agency gain (A = Err_world − Err_self) as a continuous, ablatable metric for self-world decomposition, verified by an interventional spike test.
+The paper introduces a developmental sequence, adding components one at a time to a predictive system and tracking whether self-world decomposition emerges. The GRU functions as a fixed reservoir in the key experiments (weights frozen, zero gradient into recurrent state). Only readout heads are trained. The central finding is the encoding gap: a system can perfectly compensate for its own actions in prediction while failing to encode “I am acting” as a readable internal state. Four conditions cross this gap in strict order: (1) persistent state forming stable attractors, (2) a causal action loop linking output to input, (3) proprioceptive feedback that makes implicit causal knowledge explicit — in Ye’s setup, a trace of the system’s own action fed back as input, and (4) asynchronous awakening — perceptual learning consolidating before action learning. The paper proposes agency gain (A = Err_world − Err_self) as a continuous, ablatable metric for self-world decomposition, verified by an interventional spike test.
 
 A decisive result: after the external training signal is removed, the causal agent retains self-representation at 94.9% while a statistically-matched control collapses to 53.9%. Self-representation persists only when causally useful for prediction.
 
@@ -312,7 +312,7 @@ A decisive result: after the external training signal is removed, the causal age
 
 - Developmental ordering of perception before action. Ye’s asynchronous awakening maps to Arche’s Genesis → Anima phase transition.
 
-- Proprioception as load-bearing for explicit self-representation. Ye’s “proprioceptive breakthrough” (a single scalar action trace that jumps trailing recall from 12.3% to 56.5%) validates the architectural role of proprioception specified in Arche’s architecture (Section 3.1 encoding gap note, Section 3.2 Kinesthetic / Proprioceptive Force).
+- An action trace as load-bearing for explicit self-representation. Ye’s “proprioceptive breakthrough” is a single scalar action trace — a record of the command, not of body state — that jumps trailing recall from 12.3% to 56.5%. A channel carrying the action’s consequences was already present and did not close the gap. This supports routing a command trace into the sensory stream (Architecture Specification v4.8, Section 3.1). It does not by itself show that joint-state proprioception crosses the gap; that is untested and is now an explicit ablation in the efference proof of concept. (v3.0 overstated this as validating Arche’s proprioceptive channel.)
 
 - Passive observation as measurement principle. Ye’s extensive argument that the dual-head architecture is a “thermometer, not source” parallels Arche’s registry design constraint (read-only, no influence, the system has no representation of being observed).
 
@@ -350,7 +350,7 @@ Ye’s paper establishes the entry condition: a predictive system can learn to d
 
 **Honest assessment**
 
-Ye (2026) is the closest empirical validation of Arche’s foundational bet that exists in the literature. The convergence is on specific structural conditions — efference copy as the self-world boundary mechanism, proprioception as the channel that makes the boundary readable, developmental ordering of perception before action — arrived at independently from opposite starting points (Ye from ML, Arche from biology). The encoding gap finding directly motivated a specification update to Arche’s architecture (v4.7: proprioception explicitly designated as load-bearing for self/world boundary legibility). The 12 falsified alternatives are immediately useful as a map of what does not work.
+Ye (2026) is the closest empirical validation of Arche’s foundational bet that exists in the literature. The convergence is on specific structural conditions — efference copy as the self-world boundary mechanism, an action trace fed back as input as what makes the boundary readable, developmental ordering of perception before action — arrived at independently from opposite starting points (Ye from ML, Arche from biology). The encoding gap finding directly motivated a specification update to Arche’s architecture (v4.7, corrected in v4.8: a command trace in the sensory stream as what makes the self/world boundary legible). The 12 falsified alternatives are immediately useful as a map of what does not work.
 
 The gap remains: Ye has results, Arche does not. Whether Arche’s richer substrate (Hebbian plasticity, neuromodulatory gating, multi-modal embodiment, honest physics) produces the same structural findings — or reveals new failure modes that the minimal GRU did not expose — is the empirical question.
 
@@ -376,9 +376,9 @@ Of the seven comparators, two stand closest to Arche — each along a different 
 
 **Monty** is the closest architectural analog. Both reject deep learning and backpropagation. Both treat sensorimotor interaction and embodiment as load-bearing. Both use Hebbian-adjacent local learning. Both are explicitly built from brain structure rather than from benchmark optimization. The architectural gap between them is real — Monty has no internal state dynamics, no efference copy mechanism, no three-system memory, no consolidation gating, and no neurological simulation capability — but no other system shares as many of Arche’s foundational design commitments.
 
-**Ye (2026)** is the closest empirical validation of Arche’s foundational bet. Ye demonstrated, in a controlled minimal system, that self/world boundary resolution emerges from prediction error given specific structural conditions — and that efference copy and proprioceptive feedback are the mechanisms that produce it. The developmental ordering (perception consolidating before action), the encoding gap (implicit compensation is not explicit self-representation), and the gradient-action degeneracy (reward optimization destroys the phenomenon it targets) are all empirical findings that directly support Arche’s architectural commitments. Ye arrived at these findings from ML; Arche arrived at the same structural commitments from biology. The convergence is independent.
+**Ye (2026)** is the closest empirical validation of Arche’s foundational bet. Ye demonstrated, in a controlled minimal system, that self/world boundary resolution emerges from prediction error given specific structural conditions — and that efference copy and action-trace feedback are the mechanisms that produce it. The developmental ordering (perception consolidating before action), the encoding gap (implicit compensation is not explicit self-representation), and the gradient-action degeneracy (reward optimization destroys the phenomenon it targets) are all empirical findings that directly support Arche’s architectural commitments. Ye arrived at these findings from ML; Arche arrived at the same structural commitments from biology. The convergence is independent.
 
-The remaining comparators each share individual elements. Active inference shares the prediction error commitment and hierarchical generative models. iCub shares embodiment and developmental approach. NEUCOGAR shares the neuromodulatory parameter mapping. ACT-R and SOAR share the goal of general cognitive architecture. The broader developmental robotics field shares the foundational premise. None of these overlap with Arche on the specific combination that distinguishes it: the load-bearing role of efference copy with proprioception as the encoding gap bridge, the two-component energy model, the consolidation gating conditions, and the neurological simulation as an emergent application.
+The remaining comparators each share individual elements. Active inference shares the prediction error commitment and hierarchical generative models. iCub shares embodiment and developmental approach. NEUCOGAR shares the neuromodulatory parameter mapping. ACT-R and SOAR share the goal of general cognitive architecture. The broader developmental robotics field shares the foundational premise. None of these overlap with Arche on the specific combination that distinguishes it: the load-bearing role of efference copy with a command trace as the encoding gap bridge, the two-component energy model, the consolidation gating conditions, and the neurological simulation as an emergent application.
 
 This synthesis does not claim that Arche will succeed where others have not. It claims that Arche is testing a combination of commitments that has not been tested before, and that independent empirical work has now validated the foundational mechanism at minimal scale. Whether the combination produces the predicted outcomes at full architectural scale is the work of the project.
 
@@ -460,11 +460,11 @@ The field has converged on the position that cognition must emerge from sensorim
 
 ## **From Ye (2026) — Minimal Predictive Self-World Decomposition**
 
-Ye demonstrates that self-world decomposition emerges from prediction error in a minimal system given four structural conditions, and that proprioception is the mechanism that crosses the encoding gap from implicit causal compensation to explicit self-representation. The system uses backpropagation on readout heads and imposes perceptual-before-action ordering as an explicit training schedule.
+Ye demonstrates that self-world decomposition emerges from prediction error in a minimal system given four structural conditions, and that an action trace fed back as input (Ye’s “proprioception”) is what crosses the encoding gap from implicit causal compensation to explicit self-representation. The system uses backpropagation on readout heads and imposes perceptual-before-action ordering as an explicit training schedule.
 
-*Arche mechanism:* Efference copy with proprioceptive feedback as architecturally load-bearing for self/world boundary legibility (Architecture Specification v4.7, Sections 3.1–3.2). Local Hebbian plasticity without backpropagation. No externally imposed training schedule — developmental ordering emerges from the interaction of uncalibrated motor output, bandwidth ceiling, and arousal-gated consolidation.
+*Arche mechanism:* Efference copy routed both to the forward model and, as a command trace, into the sensory stream; continuous attenuation of command-predicted sensation; no self/world labels (Architecture Specification v4.8, Sections 3.1–3.3). Local Hebbian plasticity without backpropagation. No externally imposed training schedule — developmental ordering emerges from the interaction of uncalibrated motor output, bandwidth ceiling, and arousal-gated consolidation.
 
-*Prediction:* Arche should demonstrate self/world boundary resolution at the Anima phase, observable via the agency gain metric (A = Err_world − Err_self) instrumented in the registry. If proprioception is removed or disabled, registry logs should show prediction accuracy unaffected but self/world boundary readability degraded — reproducing Ye’s encoding gap in Arche’s substrate. If the developmental ordering (perception consolidating before action learning) does not emerge naturally from Arche’s mechanisms and requires external scheduling, the self-gating claim is falsified and the architecture needs an explicit gating mechanism, validating Ye’s approach over Arche’s stronger claim.
+*Prediction:* Arche should demonstrate self/world boundary resolution at the Anima phase, observable via the agency gain metric (A = Err_world − Err_self) instrumented in the registry. If the command trace is removed while joint-state proprioception is retained, registry logs should show prediction accuracy unaffected but self/world boundary readability degraded — reproducing Ye’s encoding gap in Arche’s substrate. If readability survives, joint state carries enough action history on its own, a result Ye did not test. If the developmental ordering (perception consolidating before action learning) does not emerge naturally from Arche’s mechanisms and requires external scheduling, the self-gating claim is falsified and the architecture needs an explicit gating mechanism, validating Ye’s approach over Arche’s stronger claim.
 
 *Prediction:* Arche’s action should remain exploratory and prediction-error-driven without collapsing to degenerate constant-action patterns. Ye’s gradient-action degeneracy result predicts that any future addition of a reward-function-like optimization to the action system would collapse structured behavior. If Arche’s Hebbian-driven action produces structured exploration without gradient optimization, this validates the no-reward-function commitment against Ye’s empirical evidence that gradient-based action objectives destroy the phenomenon they optimize for.
 
@@ -484,6 +484,10 @@ This research report is source material. The Positioning section in the hypothes
 
 # **Revision Log**
 
+**v3.1 — October 2026**
+
+Corrected the link between Ye’s result and Arche. Ye’s “proprioception” is an action trace, not consequence sensing; v3.0 presented it as validating Arche’s joint-state proprioceptive channel, which Ye did not test. Overlap, synthesis, and predictions updated to match Architecture Specification v4.8. Ye’s findings themselves are unchanged.
+
 **v3.0 — September 2026**
 
 Added Section 7: Ye (2026) — “From Prediction to Self.” Full comparative analysis including overlap, differences, what Ye has that Arche does not, and where Arche is architecturally positioned beyond Ye’s results. Added corresponding Results-Based Predictions subsection with two falsifiable predictions: proprioceptive encoding gap reproduction, and self-gating vs. imposed developmental ordering. This is the first comparator with direct empirical evidence for Arche’s foundational architectural bet (efference copy as self/world boundary, prediction error as sole learning signal, developmental ordering of perception before action).
@@ -496,4 +500,4 @@ Phase references updated throughout: Prometheus renamed to Telos. Four enumerate
 
 Initial research report.
 
-*Project Arche — Prior Work and Positioning Research Report v3.0*
+*Project Arche — Prior Work and Positioning Research Report v3.1*
