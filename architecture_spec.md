@@ -1,6 +1,6 @@
 **PROJECT ARCHE**
 
-*Architecture Specification — v4.6*
+*Architecture Specification — v4.7*
 
 # **1. Design Principles**
 
@@ -14,9 +14,9 @@ Core architectural commitments:
 
 - Prediction error as the only learning signal. The system operates without a reward function, without batch training, and without backpropagation.
 
-- Local plasticity only. Hebbian co-activation is the foundational mechanism. Spike-timing dependence, neuromodulatory gating, and oscillatory phase windows constrain when and how much Hebbian updating occurs. No backpropagation, no global error signals, no batch training.
+- Local plasticity only. Hebbian co-activation is the foundational mechanism. Spike-timing dependence, neuromodulatory gating, and oscillatory phase windows make Hebbian updating precise, selective, and temporally coherent. No backpropagation, no global error signals, no batch training.
 
-- Finite resources. Bandwidth, working memory, energy, and structural capacity are capped. These constraints affect system behavior directly.
+- Finite resources. Bandwidth, working memory, energy, and structural capacity are capped. These constraints are load-bearing.
 
 - Dependency-driven activation. Components activate when their inputs exist.
 
@@ -24,9 +24,9 @@ Core architectural commitments:
 
 # **2. Physics Engine Substrate**
 
-Genesis (Genesis-Embodied-AI/Genesis). The Genesis project technical report is dated December 2024 (Genesis Authors, Genesis: A Generative and Universal Physics Engine for Robotics and Beyond, https://github.com/Genesis-Embodied-AI/Genesis). Capabilities relevant to Arche per official sources: Python-native API; unified rigid body, MPM, SPH, FEM, PBD, and stable fluid solvers; explicit material parameters including stiffness, elasticity, damping, friction; reported simulation speed 10 to 80 times faster than Isaac Gym/Sim/Lab and MuJoCo MJX. GPU-accelerated backend confirmed working on the development hardware. Detailed capability sourcing and verification status documented in the Brain Model Mapping.
+Genesis (Genesis-Embodied-AI/Genesis). The Genesis project technical report is dated December 2024 (Genesis Authors, Genesis: A Generative and Universal Physics Engine for Robotics and Beyond, https://github.com/Genesis-Embodied-AI/Genesis). Capabilities relevant to Arche per official sources: Python-native API; unified rigid body, MPM, SPH, FEM, PBD, and stable fluid solvers; explicit material parameters including stiffness, elasticity, damping, friction; reported simulation speed 10 to 80 times faster than Isaac Gym/Sim/Lab and MuJoCo MJX. AMD ROCm backend confirmed working on target hardware (AMD Radeon RX 6800XT, RDNA 2) as of May 2026. Detailed capability sourcing and verification status documented in Brain Model Mapping Section 8.
 
-The physics engine is integrated with the cognitive architecture. Oscillator frequencies, behavioral timescales, and encoding grain are derived from physics environment parameters at runtime. The Genesis environment design — specified in the Environment design document — is the other half of the cognitive substrate.
+The physics engine is integrated with the cognitive architecture. Oscillator frequencies, behavioral timescales, and encoding grain are derived from physics environment parameters at runtime. The Genesis environment design — specified in the Eden Physics Environment Design document — is the other half of the cognitive substrate.
 
 # **3. Functional Architecture**
 
@@ -36,7 +36,7 @@ The system is specified as a set of functional components with explicit input de
 
 ### **Bipedal Humanoid Body**
 
-A physical body inhabiting the Genesis environment. Bipedal humanoid morphology with a full human kinematic chain. The body is inherited complete at system start; only cognition develops. The richer kinematic chain (relative to a simple effector) is an architectural choice: it produces a richer efference copy signal, a more complex self/world boundary resolution problem, and a denser cross-modal prediction surface.
+A physical body inhabiting the Genesis environment. Bipedal humanoid morphology with a full human kinematic chain. The body is inherited complete at system start; only cognition develops. The richer kinematic chain (relative to a simple effector) is an architectural choice: it produces a richer efference copy signal, a more complex self/world boundary resolution problem, and a denser cross-modal prediction surface. Complexity here is load-bearing, not decorative.
 
 - Mass, volume, and collision surface across all body segments.
 
@@ -44,13 +44,13 @@ A physical body inhabiting the Genesis environment. Bipedal humanoid morphology 
 
 - Joint limits, damping, and torque specified per joint via an inherited or adapted human URDF. Genesis accepts URDF natively and handles the physics of the articulated chain.
 
-- Bipedal balance is a continuous prediction problem that keeps the sensorimotor system engaged and produces ongoing low-level prediction error.
+- Bipedal balance is a continuous, never-trivially-solved prediction problem — permanent sensorimotor engagement and permanent low-level prediction error. The body is always slightly falling and catching itself.
 
-- Independent finger articulation provides a dense cross-modal surface: manipulation produces simultaneous proprioceptive, visual, and contact predictions, with the hands visible in the visual field.
+- Independent finger articulation is the richest cross-modal surface: manipulation produces simultaneous proprioceptive, visual, and contact predictions, with the hands visible in the visual field.
 
-- The body surface is a visual prediction substrate. Skin appearance varies with illumination, and hair provides continuous low-amplitude visual motion tied to both self-movement and environmental wind; both serve as efference copy test cases. Appearance is non-overtly human. Aesthetic detail is an implementation concern and does not affect the functional specification.
+- Body surface is a visual prediction substrate. Opalescent skin produces complex, illumination-dependent appearance; long hair provides continuous low-amplitude visual motion tied to both self-movement and environmental wind. Both are clean efference copy test cases. Appearance is non-overtly human; aesthetic detail is an implementation concern and does not affect the functional specification.
 
-Motor output at start is uncalibrated. Force and motor calibration develop through interaction with the environment.
+Motor output at start is uncalibrated. Force and motor calibration emerge from consequence.
 
 *Depends on: Genesis physics engine.*
 
@@ -65,6 +65,10 @@ Self/world boundary generator. Every motor action produces a paired predictive s
 - Self/world distinction emerges as a consistency pattern from this mechanism. The richer the kinematic chain, the richer this signal.
 
 *Depends on: Humanoid body. Motor output across the kinematic chain.*
+
+**Encoding gap and the proprioceptive channel.** The efference copy mechanism generates implicit causal knowledge: the forward model compensates for self-caused prediction error through distributed weight dynamics. This compensation alone does not produce readable self-representation — a system can perfectly predict its own effects without encoding “I am acting” as a distinguishable internal state (Ye 2026, arXiv:2606.05605). The proprioceptive channel (Section 3.2, Kinesthetic / Proprioceptive Force) is what crosses this gap. Joint state and force feedback write action history directly into the sensory input stream, making the system’s own causal activity available as explicit signal rather than implicit compensation. Without proprioception, the self/world boundary exists in the system’s predictive accuracy but is not readable from its internal state. With it, the boundary becomes a representable feature. Proprioception is therefore architecturally load-bearing for self/world boundary resolution, not merely an additional sensory channel.
+
+*Depends on: Kinesthetic / Proprioceptive Force (Section 3.2). The efference copy generates the boundary; proprioception makes it legible.*
 
 ## **3.2 Sensory Primitives**
 
@@ -90,6 +94,8 @@ Resistance to applied force and joint state across the kinematic chain. Inertial
 
 *Depends on: Articulated body. Genesis rigid body dynamics.*
 
+**Architectural role.** This channel serves a dual function. As a sensory primitive, it provides limb position and force data for motor calibration and physical interaction. As a companion to the efference copy mechanism (Section 3.1), it is the architectural pathway through which implicit causal knowledge becomes explicit self-representation. This second role is not decorative — it is a prerequisite for the self/world boundary to be readable in the system’s activation state rather than buried in weight dynamics. See Section 3.1, encoding gap note.
+
 ### **Static and Dynamic Contact Force**
 
 Surface boundary, contact intensity, distribution, directionality.
@@ -100,7 +106,7 @@ Surface boundary, contact intensity, distribution, directionality.
 
 ### **Stereoscopic Photoreception**
 
-Bifocal depth-native vision. Two cameras with fixed baseline separation mounted on the body, rendered through a physics-principled ray-tracing renderer producing RGB and depth.
+Bifocal depth-native vision. Two cameras with fixed baseline separation mounted on the body, rendered through the Luisa ray tracer (Vulkan backend; the CUDA-only Nyx renderer is unavailable on AMD hardware).
 
 - Raw outputs: left RGB, right RGB, left depth, right depth, stereo disparity map.
 
@@ -110,11 +116,11 @@ Bifocal depth-native vision. Two cameras with fixed baseline separation mounted 
 
 - Vision extends the predictive horizon beyond contact: predictions form about objects before contact, producing cross-modal prediction error at the moment of contact.
 
-*Depends on: Genesis rendering pipeline. Two-camera body configuration.*
+*Depends on: Genesis/Luisa rendering pipeline. Two-camera body configuration.*
 
 ### **Stereo Audition**
 
-Vibration-based audition, active from entry. Genesis has no native audio; the auditory signal is generated by physics-grounded synthesis from Genesis contact data, so sound shares the same physical substrate as mechanoreception.
+Vibration-based audition, active from entry. Genesis has no native audio; the auditory signal is generated by physics-grounded synthesis from Genesis contact data, keeping sound rooted in the same physical substrate as mechanoreception.
 
 - Synthesis mapping: material stiffness → frequency content; impact force magnitude → amplitude; damping → decay rate and resonance tail; contact surface → spectral shape. A contact event produces a force signature and a sound from the same physical parameters.
 
@@ -188,7 +194,7 @@ Passive recovery (no action):
 
 E_fast(t) = E_fast_max × (1 − e^(−t/τ_fast))
 
-E_slow(t) = E_slow_max × (1 − e^(−t/τ_slow))   where τ_fast << τ_slow
+E_slow(t) = E_slow_max × (1 − e^(−t/τ_slow)) where τ_fast \<\< τ_slow
 
 Depletion (during action): action draws from E_fast first; once E_fast reaches floor, action draws from E_slow; draw rate scales with action intensity; recovery floor is non-zero (minimal action remains available at depletion).
 
@@ -228,7 +234,7 @@ Empirical calibration: constants τ_fast, τ_slow, k, E_fast_max, E_slow_max are
 
 ## **3.5 Predictive Core**
 
-Three hierarchical levels operating at different timescales. Top-down predictions cascade downward. Bottom-up error signals propagate upward, filtered at each level. Learning proceeds via local plasticity: Hebbian co-activation as the foundational rule, modulated by spike-timing dependence, neuromodulatory broadcasting, and oscillatory phase windows. A GPU tensor compute layer (e.g., PyTorch) provides the underlying array operations.
+Three hierarchical levels operating at different timescales. Top-down predictions cascade downward. Bottom-up error signals propagate upward, filtered at each level. Learning proceeds via local plasticity: Hebbian co-activation as the foundational rule, modulated by spike-timing dependence, neuromodulatory broadcasting, and oscillatory phase windows. PyTorch operates as a GPU tensor compute layer.
 
 ### **Level 1 — Sensorimotor Prediction**
 
@@ -258,7 +264,7 @@ Minutes-to-hours timescale. Predicts environmental regularities.
 
 - Rare significant errors only. Stable concept consolidation territory.
 
-- Slow regularities consolidate here: the day/night lighting cycle, stable ravine geometry, fauna movement patterns, and the body's own appearance across lighting conditions.
+- Slow regularities consolidate here: the day/night lighting cycle, stable ravine geometry, fauna movement patterns, and the body’s own appearance across lighting conditions.
 
 *Depends on: Stable Level 2 predictions. Long-term memory consolidation.*
 
@@ -272,7 +278,7 @@ Three distinct mechanisms operate together to produce the learning behavior of t
 
 - Systems coordination. How distributed components synchronize. Oscillatory phase coupling, bandwidth gating, attentional competition, and biased competition at the sensory encoder.
 
-Hebbian updating is the foundational rule. The remainder of the stack constrains when and how much it occurs. The architecture rejects backpropagation, global error signals, and batch training; it draws on the broader local plasticity literature.
+Hebbian updating is the foundational principle. The remainder of the stack makes it precise, selective, and temporally coherent. The architecture rejects backpropagation, global error signals, and batch training. It does not reject the broader local plasticity literature.
 
 ### **Credit Assignment — Three Mechanisms**
 
@@ -310,17 +316,17 @@ The body is inherited complete; the node population is likewise fixed from syste
 
 ### **Structural Plasticity and the Structural Ceiling**
 
-Connections compete for a fixed resource budget. The architecture specifies both growth and decay:
+The network is a finite economy of predictions competing for a fixed resource budget. The architecture specifies both halves of structural plasticity:
 
 - Growth. Connections form and strengthen via Hebbian co-activation, with update magnitude modulated by arousal.
 
-- Decay and pruning. A connection occupies storage and draws maintenance energy to persist. Pruning removes connections the system cannot afford to maintain, retaining those with sufficient accumulated weight.
+- Decay and pruning. A connection is a physical commitment of finite substrate — it occupies storage and draws maintenance energy to persist. Pruning is not cleanup; it is the system being unable to afford every prediction it could make and keeping the ones that pay.
 
 - Survival rule. Survival is a function of accumulated weight (lifetime reinforcement), not recent activation alone — avoiding the failure mode where a critical but recently-inactive connection is pruned. This is consistent with significance treated as connection-weight geometry.
 
 - Energy coupling. Maintenance has metabolic cost, so chronic energy depletion raises pruning pressure and degrades existing structure over time, not just new learning. This is the architectural basis for the chronic-fatigue / depression / burnout signatures in the neurological research application.
 
-- Circadian timing. Pruning runs on the sleep window aligned to the Environment's day/night cycle, sequenced after consolidation, never before — reversing the order would prune connections consolidation was about to reinforce.
+- Circadian timing. Pruning runs on the sleep window aligned to Eden’s day/night cycle, sequenced after consolidation, never before — reversing the order would prune connections consolidation was about to reinforce.
 
 - Emergent ratio. The connections-per-node ratio is not a design parameter; it emerges from the growth and pruning economy, and different regions settle at different ratios depending on what they compute. The design task is specifying growth and pruning rules that let the right ratio emerge, not picking a number. Prior-art reference for balanced pruning/regeneration: SD-SNN (Han et al., 2022).
 
@@ -366,7 +372,7 @@ Passive forgetting runs at baseline. Chronic energy depletion accelerates struct
 
 During the circadian pruning window, any connection where:
 
-w < w_min
+w \< w_min
 
 is pruned. w_min is not hardcoded — it is a function of current total connection count relative to the hardware budget ceiling:
 
@@ -378,7 +384,7 @@ When the network is sparse, w_min is low — connections are cheap to maintain. 
 
 At steady state, growth rate equals decay rate for the surviving connection population. That equilibrium point is the emergent conn/node ratio for that region. Different regions settle at different ratios because different prediction problems demand different connection densities. The ratio is a measurement of what the region computes, not a design parameter.
 
-Structural ceiling as physical budget. The brain is the running process, not a data structure operated on from outside. The structural ceiling is the physical compute budget of the hardware the system runs on, rather than a configuration value. The implementation budget and the two-tier memory model (a fast working-set tier and a larger full-store tier, with cold connections paged into the working set on demand) are tracked operationally pending empirical measurement.
+Structural ceiling as physical budget. The brain is the running process itself, not a data structure operated on from outside; the structural ceiling is literally the physical compute budget of the target hardware, not an arbitrary configuration value. Implementation budget and the two-tier (VRAM working set / DRAM full store) memory model are tracked in the Development Log pending empirical measurement.
 
 *Depends on: All predictive core levels. Internal state (arousal for growth magnitude; energy for maintenance and pruning pressure). Circadian cycle for pruning window.*
 
@@ -488,7 +494,7 @@ Language attaches to already-formed physical concepts via Hebbian pairing. The s
 
 The registry is the only observation window into the developing system. It is architecturally isolated.
 
-- Asynchronous: runs in a separate process with separate memory space (may live in the full-store memory tier).
+- Asynchronous: runs in a separate process with separate memory space (may live in the DRAM tier).
 
 - Read-only: receives snapshots of network activation states; never writes back.
 
@@ -496,17 +502,17 @@ The registry is the only observation window into the developing system. It is ar
 
 - Logs: concept candidates, formation time, stability score, generalization breadth.
 
-- The network has no representation of the registry's existence.
+- The network has no representation of the registry’s existence.
 
 The registry recognizes when the network has already formed a concept. Passive recognition, not active classification. Specialization — node populations consistently activating on particular channels or cross-modal patterns — should become visible here as emergent topographic structure, not as anything engineered.
 
 ### **Observation Views (Planned)**
 
-Beyond the concept log, two observation views are planned, both pure read-only and non-influencing: a first-person view (the raw stereo visual feed from Arche's own cameras) and a third-person view (an external Genesis camera observing the body in the Environment). A live map of emerging specialization is a planned visualization goal alongside the static log.
+Beyond the concept log, two observation views are planned, both pure read-only and non-influencing: a first-person view (the raw stereo visual feed from Arche’s own cameras) and a third-person view (an external Genesis camera observing the body in Eden). A live map of emerging specialization is a planned visualization goal alongside the static log.
 
 # **5. The Core Loop**
 
-The core loop runs continuously. Prediction error is the only learning signal.
+The core loop runs continuously. Prediction error is the only learning signal. Physics is the judge.
 
 World State (Genesis)
 
@@ -542,7 +548,7 @@ Registry observes stable causal relational concepts. Language pairing is introdu
 
 **Telos**
 
-Registry logs behavior with no seeding interaction. Self-directed exploration and concept formation continue without external input. The system operates on its own across the environment, reflecting the structure it developed over the preceding phases rather than any externally imposed objective.
+Registry logs behavior with no seeding interaction. Self-directed exploration and concept formation continue without external input. The system moves through its environment as the expression of what it has become — fulfillment of the architecture’s nature given honest conditions and sufficient time. The destination was not imposed; it was latent in the design from Genesis.
 
 # **7. Implementation Stack**
 
@@ -550,24 +556,31 @@ Registry logs behavior with no seeding interaction. Self-directed exploration an
 
 - C++ / Cython / Numba — hot paths in core learning loop.
 
-- A GPU tensor compute layer (e.g., PyTorch) — array operations on the accelerator. Autograd optional.
+- PyTorch 2.9.1 — GPU tensor compute via ROCm. Installed from AMD official wheels (repo.radeon.com). Autograd optional.
 
-- Genesis — physics engine. Python-native API. GPU-accelerated backend. Headless operation supported.
+- Genesis — physics engine. Installed from source (post v0.4.7). Python-native API. AMD ROCm backend confirmed working via gs.init(backend=gs.amdgpu). Headless operation confirmed via show_viewer=False.
 
-- A physics-principled ray-tracing renderer for stereo vision (RGB + depth).
+- Luisa — ray-tracing renderer via Vulkan for stereo vision (Nyx is CUDA-only and unavailable on AMD hardware).
 
+- ROCm 7.2.2 — GPU acceleration on AMD Radeon RX 6800XT (RDNA 2). Installed via AMD official package repository.
 
-- A Python environment manager.
+- Mamba / Miniforge — Python environment management. Project environment: arche.
 
-- A Linux operating system.
+- Ubuntu 26.04 LTS — operating system. Requires a libxml2 symlink for Genesis AMD-backend JIT compilation (see Development Log).
 
 # **8. Changelog**
+
+**v4.7 — Proprioception as load-bearing mechanism for self/world boundary legibility**
+
+- Section 3.1 Efference Copy Mechanism: added encoding gap note. Documents that efference copy generates implicit causal knowledge (predictive compensation for self-caused error) but does not by itself produce readable self-representation. Proprioception (Section 3.2) is explicitly designated as the mechanism that crosses this gap — writing action history into the sensory input stream so the self/world boundary becomes a representable feature, not just a predictive accuracy difference. Motivated by Ye 2026 (arXiv:2606.05605), which empirically demonstrated this dissociation in a minimal predictive system.
+
+- Section 3.2 Kinesthetic / Proprioceptive Force: added architectural role note. Elevates proprioception from sensory channel to dual-function component — sensory input for motor calibration AND the architectural pathway through which implicit causal knowledge becomes explicit self-representation. Cross-referenced to the encoding gap note in Section 3.1.
 
 **v4.6 — Embodiment, sensory completion, structural plasticity, node spec, quantitative pruning rules**
 
 - Section 3.1 Embodiment: polygonal body placeholder replaced with a fully specified bipedal humanoid body (human DOF ceiling, URDF-sourced joint limits, balance and finger articulation as load-bearing prediction surfaces, body surface as visual prediction substrate). Efference copy updated to reference the full kinematic chain.
 
-- Section 3.2 Sensory Primitives: all channels confirmed active from entry. Stereoscopic photoreception specified (ray-traced RGB+depth+disparity, depth privileged, no engineered features). Stereo audition added (physics-grounded synthesis from Genesis contact data, ITD/ILD spatial positioning, HRTF deferred).
+- Section 3.2 Sensory Primitives: all channels confirmed active from entry. Stereoscopic photoreception specified (Luisa/Vulkan, raw RGB+depth+disparity, depth privileged, no engineered features). Stereo audition added (physics-grounded synthesis from Genesis contact data, ITD/ILD spatial positioning, HRTF deferred).
 
 - Section 3.3: added Sampling Rate Asymmetry (vision at render rate, mechanoreception at physics rate, audition at its own rate). Self/world tagging extended to self-caused visual change.
 
@@ -577,14 +590,15 @@ Registry logs behavior with no seeding interaction. Self-directed exploration an
 
 - Section 4 Registry: added planned first-person and third-person observation views and the emergent-specialization visualization goal.
 
+- Section 7: Luisa renderer and libxml2 note added.
 
 **v4.5 — Final phase renamed**
 
-- Section 6: Prometheus renamed to Telos. The phase describes self-directed behavior that develops given sufficient time and undirected operation.
+- Section 6: Prometheus renamed to Telos. The phase describes self-directed behavior as the fulfillment of the architecture’s nature given honest conditions and sufficient time, not capability seized through transgression.
 
 **v4.4 — Implementation stack verification and environment update**
 
-- Section 2 and Section 7 updated to reflect the verified development environment. Development Log introduced as authoritative record for operational progress.
+- Section 2 and Section 7 updated to reflect the verified environment (ROCm 7.2.2, PyTorch 2.9.1 AMD wheels, Genesis amdgpu backend, Python 3.12, Mamba/Miniforge, Ubuntu 26.04). Development Log introduced as authoritative record for operational progress.
 
 **v4.3 — Architecture/biology decoupling**
 
@@ -602,8 +616,4 @@ Registry logs behavior with no seeding interaction. Self-directed exploration an
 
 - Document restructured around functional components and dependency relationships. Phases relocated to Section 6 as registry observation baseline.
 
-*Project Arche — Architecture Specification v4.6*
-
----
-
-© 2026 [YOUR NAME]. Licensed under [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+*Project Arche — Architecture Specification v4.7*
