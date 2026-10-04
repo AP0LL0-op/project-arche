@@ -1,5 +1,6 @@
 from world import World
 from forward_model import ForwardModel
+from forward_model import EfferenceModel
 import os
 from logger import Logger
 os.makedirs("logs", exist_ok=True)
@@ -8,9 +9,11 @@ dt = 1/60
 run_seconds = 10
 reverse_seconds = 4
 world = World()
-model = ForwardModel()
+channels = list(world.read_sensors())
+persistence = ForwardModel()
+efference = EfferenceModel(channels, learning_rate=0.01)
 fieldnames = ["sim_time", "command"]
-for channel in world.read_sensors():
+for channel in channels:
     fieldnames.append(f"{channel}_pred")
     fieldnames.append(f"{channel}_obs")
     fieldnames.append(f"{channel}_err")
@@ -32,16 +35,22 @@ for tick in range(round(run_seconds/dt)):
     else:
         command = -2
     state = world.read_sensors()
-    prediction = model.predict(state)
+    blind_pred = persistence.predict(state)
+    eff_pred = efference.predict(state, command)
     world.apply_motor(command)
     world.step(dt)
     observed = world.read_sensors()
-    error = {}
+    blind_error = {}
+    eff_error = {}
     row = {"sim_time": sim_time, "command": command}
     for channel in observed:
-        error[channel] = observed[channel] - prediction[channel]
-        row[f"{channel}_pred"] = prediction[channel]
+        blind_error[channel] = observed[channel] - blind_pred[channel]
+        eff_error[channel] = observed[channel] - eff_pred[channel]
+        row[f"{channel}_pred"] = blind_pred[channel]
         row[f"{channel}_obs"] = observed[channel]
-        row[f"{channel}_err"] = error[channel]
+        row[f"{channel}_err"] = blind_error[channel]
+    efference.learn(command, eff_error)
+    if tick % 60 == 0:
+        print(round(sim_time), efference.weights)
     logger.log(row)
 logger.close()
