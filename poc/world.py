@@ -71,6 +71,7 @@ class World:
     def apply_motor(self, commands):
         self.motor.rate = -commands
 
+    # sensor read out
     def read_sensors(self):
         contact_total = 0
         def add_contact(arbiter):
