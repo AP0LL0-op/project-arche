@@ -56,7 +56,7 @@ The command alone beats the agent. "Nonlinearity required" in P2 = computing |tr
 
 **Verdict.** Adopted as the PREREG design (overriding mover; sensation-only and command-only baselines; validity gate). Plasticity still lowers BA (0.71 → 0.60): the placeholder rule's open problem.
 
-## P4 — diagnosing why plasticity hurts (other session; scripts not in repo)
+## P4 — diagnosing why plasticity hurts (`diag.py`, `dir.py`)
 
 - Ruled out: dead nodes (15/16 active after learning).
 - Ruled out: decoder staleness. Interleaved-block decoder: plastic 0.62 vs frozen 0.75. A random split appeared to close the gap, but that was neighbouring ticks leaking into the test set.
