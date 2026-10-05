@@ -12,11 +12,11 @@ class World:
         ball_moment = pymunk.moment_for_circle(ball_mass, inner_radius=0, outer_radius=30)
         self.ball_body = pymunk.Body(ball_mass, ball_moment)
         self.ball_body.position = (450, 200)
-        ball_shape = pymunk.Circle(body=self.ball_body, radius=30)
-        ball_shape.elasticity = 0.9
-        ball_shape.friction = 0.3
-        ball_shape.color = (255, 0, 0, 255)
-        self.space.add(self.ball_body, ball_shape)
+        self.ball_shape = pymunk.Circle(body=self.ball_body, radius=30)
+        self.ball_shape.elasticity = 0.9
+        self.ball_shape.friction = 0.3
+        self.ball_shape.color = (255, 0, 0, 255)
+        self.space.add(self.ball_body, self.ball_shape)
 
         # the arm anchor
         self.arm_anchor = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -58,10 +58,10 @@ class World:
             self.space.add(wall_segment)
 
         # fixed wall
-        fixed_wall_segment = pymunk.Segment(self.space.static_body, a=(200, 200), b=(100, 200), radius=5)
-        fixed_wall_segment.elasticity = 1.0
-        fixed_wall_segment.friction = 0.3
-        self.space.add(fixed_wall_segment)
+        self.fixed_wall_segment = pymunk.Segment(self.space.static_body, a=(200, 200), b=(100, 200), radius=5)
+        self.fixed_wall_segment.elasticity = 1.0
+        self.fixed_wall_segment.friction = 0.3
+        self.space.add(self.fixed_wall_segment)
 
     # advance the physics by dt seconds
     def step(self, dt):
@@ -82,3 +82,16 @@ class World:
             "angle": self.arm_body.angle, 
             "angular_velocity": self.arm_body.angular_velocity,
             "contact": contact_total}
+
+    def ground_truth(self):
+        touching = {"ball": False, "wall": False, "border": False}
+        def check_contact(arbiter):
+            for shape in arbiter.shapes:
+                if shape is self.ball_shape:
+                    touching["ball"] = True
+                elif shape is self.fixed_wall_segment:
+                    touching["wall"] = True
+                elif shape.body is not self.arm_body:
+                    touching["border"] = True
+        self.arm_body.each_arbiter(check_contact)
+        return touching
