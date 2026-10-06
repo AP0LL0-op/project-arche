@@ -1,17 +1,18 @@
 from world import World
 from forward_model import BlindModel, EfferenceModel
+from babbler import Babbler
 import os
 from logger import Logger
 os.makedirs("logs", exist_ok=True)
 
 dt = 1/60
 run_seconds = 10
-reverse_seconds = 4
 world = World()
 channels = list(world.read_sensors())
 truth_names = list(world.ground_truth())
 efference = EfferenceModel(channels, learning_rate=0.01)
 blind = BlindModel(channels, learning_rate=0.01)
+babbler = Babbler(seed=100)
 fieldnames = ["sim_time", "command"]
 for channel in channels:
     fieldnames.append(f"{channel}_obs")
@@ -24,13 +25,10 @@ for name in truth_names:
     fieldnames.append(f"truth_{name}")
 logger = Logger('logs/run.csv', fieldnames)
 
+# core loop
 for tick in range(round(run_seconds/dt)):
     sim_time = tick * dt
-    window = int(sim_time//reverse_seconds)
-    if window % 2 == 0:
-        command = 2
-    else:
-        command = -2
+    command = babbler.next_command()
     state = world.read_sensors()
     blind_pred = blind.predict(state)
     eff_pred = efference.predict(state, command)
