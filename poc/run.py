@@ -7,7 +7,7 @@ os.makedirs("logs", exist_ok=True)
 
 dt = 1/60
 run_seconds = 10
-world = World()
+world = World(mover_seed=101, mover_on_prob=0.5)
 channels = list(world.read_sensors())
 truth_names = list(world.ground_truth())
 efference = EfferenceModel(channels, learning_rate=0.01)

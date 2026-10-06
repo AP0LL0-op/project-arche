@@ -1,7 +1,8 @@
 import pymunk
+from babbler import Babbler
 
 class World:
-    def __init__(self):
+    def __init__(self, mover_seed, mover_on_prob):
         self.space = pymunk.Space()
 
         # gravity is zero to simulate a top down simulation, rather than risk motion dying
@@ -37,9 +38,17 @@ class World:
         self.space.add(self.arm_body, arm_shape, arm_joint)
 
         # the motor
+        self.motor_force = 100000
         self.motor = pymunk.SimpleMotor(self.arm_anchor, self.arm_body, rate=0)
-        self.motor.max_force = 100000
+        self.motor.max_force = self.motor_force
         self.space.add(self.motor)
+
+        # the external mover
+        self.mover_babbler = Babbler(seed=mover_seed, p_zero=1-mover_on_prob)
+        self.mover = pymunk.SimpleMotor(self.arm_anchor, self.arm_body, rate=0)
+        self.mover.max_force = 0
+        self.space.add(self.mover)
+        self.mover_command = 0
 
         # the arena border
         borders = [
@@ -65,6 +74,14 @@ class World:
 
     # advance the physics by dt seconds
     def step(self, dt):
+        self.mover_command = self.mover_babbler.next_command()
+        if self.mover_command == 0:
+            self.mover.max_force = 0
+            self.motor.max_force = self.motor_force
+        else:
+            self.mover.rate = -self.mover_command
+            self.mover.max_force = self.motor_force
+            self.motor.max_force = 0
         self.space.step(dt)
 
     # SimpleMotor spins body b opposite to rate; flip so positive command = positive rotation
@@ -94,4 +111,5 @@ class World:
                 elif shape.body is not self.arm_body:
                     touching["border"] = True
         self.arm_body.each_arbiter(check_contact)
+        touching["mover_active"] = self.mover_command != 0
         return touching
