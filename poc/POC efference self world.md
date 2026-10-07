@@ -1,3 +1,5 @@
+> **Status:** v0.1 planning doc; superseded in specifics by PREREG.md (single-link arm, ball, overriding mover).
+
 # Project Arche — Proof of Concept
 
 ### Efference Copy Self/World Discrimination

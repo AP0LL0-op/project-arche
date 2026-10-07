@@ -1,0 +1,44 @@
+seed 100 k=None: BA plastic 0.728  cos plastic 0.007  dead plastic 0.000  BA frozen 0.751  cos frozen 0.003  dead frozen 0.000  gap -0.023
+seed 100 k=2: BA plastic 0.736  cos plastic 0.000  dead plastic 0.000  BA frozen 0.785  cos frozen 0.000  dead frozen 0.000  gap -0.050
+seed 100 k=3: BA plastic 0.734  cos plastic -0.073  dead plastic 0.000  BA frozen 0.756  cos frozen 0.001  dead frozen 0.000  gap -0.023
+seed 101 k=None: BA plastic 0.491  cos plastic 0.047  dead plastic 0.000  BA frozen 0.589  cos frozen 0.058  dead frozen 0.000  gap -0.098
+seed 101 k=2: BA plastic 0.668  cos plastic 0.000  dead plastic 0.000  BA frozen 0.599  cos frozen 0.000  dead frozen 0.000  gap 0.068
+seed 101 k=3: BA plastic 0.497  cos plastic 0.115  dead plastic 0.000  BA frozen 0.598  cos frozen 0.036  dead frozen 0.000  gap -0.101
+seed 102 k=None: BA plastic 0.650  cos plastic -0.094  dead plastic 0.000  BA frozen 0.737  cos frozen -0.057  dead frozen 0.000  gap -0.088
+seed 102 k=2: BA plastic 0.801  cos plastic 0.000  dead plastic 0.000  BA frozen 0.643  cos frozen 0.000  dead frozen 0.000  gap 0.157
+seed 102 k=3: BA plastic 0.516  cos plastic -0.061  dead plastic 0.000  BA frozen 0.728  cos frozen 0.050  dead frozen 0.000  gap -0.213
+seed 103 k=None: BA plastic 0.814  cos plastic 0.010  dead plastic 0.000  BA frozen 0.614  cos frozen -0.052  dead frozen 0.000  gap 0.200
+seed 103 k=2: BA plastic 0.702  cos plastic 0.000  dead plastic 0.000  BA frozen 0.708  cos frozen 0.000  dead frozen 0.000  gap -0.007
+seed 103 k=3: BA plastic 0.690  cos plastic -0.018  dead plastic 0.000  BA frozen 0.634  cos frozen -0.044  dead frozen 0.000  gap 0.056
+seed 104 k=None: BA plastic 0.613  cos plastic -0.017  dead plastic 0.000  BA frozen 0.670  cos frozen -0.001  dead frozen 0.000  gap -0.057
+seed 104 k=2: BA plastic 0.651  cos plastic 0.000  dead plastic 0.000  BA frozen 0.687  cos frozen 0.000  dead frozen 0.000  gap -0.036
+seed 104 k=3: BA plastic 0.690  cos plastic -0.075  dead plastic 0.000  BA frozen 0.701  cos frozen -0.033  dead frozen 0.000  gap -0.010
+
+ext-while-commanding share of label 0: 0.62 (0.60-0.65)
+
+--- dense
+BA plastic   0.659 (0.491-0.814)
+cos plastic  -0.009 (-0.094-0.047)
+dead plastic 0.000 (0.000-0.000)
+BA frozen    0.672 (0.589-0.751)
+cos frozen   -0.010 (-0.057-0.058)
+dead frozen  0.000 (0.000-0.000)
+gap          -0.013 (-0.098-0.200)
+
+--- sparse k=2
+BA plastic   0.711 (0.651-0.801)
+cos plastic  0.000 (0.000-0.000)
+dead plastic 0.000 (0.000-0.000)
+BA frozen    0.685 (0.599-0.785)
+cos frozen   0.000 (0.000-0.000)
+dead frozen  0.000 (0.000-0.000)
+gap          0.027 (-0.050-0.157)
+
+--- sparse k=3
+BA plastic   0.625 (0.497-0.734)
+cos plastic  -0.023 (-0.075-0.115)
+dead plastic 0.000 (0.000-0.000)
+BA frozen    0.683 (0.598-0.756)
+cos frozen   0.002 (-0.044-0.050)
+dead frozen  0.000 (0.000-0.000)
+gap          -0.058 (-0.213-0.056)
