@@ -43,7 +43,7 @@ All conditions share the same random initial weights per seed. Yoked agents rece
 | Parameter | Value |
 |---|---|
 | Population size | 16 |
-| Initial weights | W ~ Gaussian(0, 0.5), dense 16×4, from the init stream (3a). Dense deviates from spec v4.8 "sparsely connected". Sparsity belongs to the connection economy (out of POC scope). P6 (proxy): a sparse mask, k=2 and k=3, made no detectable difference. |
+| Initial weights | W ~ Gaussian(0, 0.5), dense 16×4: `numpy.random.default_rng(init).normal(0, 0.5, (16, 4))`, the first draw from the init stream (3a). Effective rank of the governed inits (Section 9), computed before any run: seeds 0–4 → 3.21, 3.09, 3.58, 3.18, 3.02; none below 2.5. Dense deviates from spec v4.8 "sparsely connected". Sparsity belongs to the connection economy (out of POC scope). P6 (proxy): a sparse mask, k=2 and k=3, made no detectable difference. |
 | Activity | a(t) = 0.9·a(t−1) + 0.1·relu(W·x(t) − θ), θ = 0 for every node, no jitter. Random W breaks symmetry; θ is not needed for it. |
 | Inputs x | angle, angular velocity, contact, command trace; each normalised by running mean and variance (EMA, time constant 1,000 ticks), identical rule for all |
 | Command trace | τ(t) = 0.95·τ(t−1) + 0.05·command(t), signed (deviation from Ye's \|a\|, documented) |
@@ -72,9 +72,11 @@ All conditions share the same random initial weights per seed. Yoked agents rece
 
 In the final evaluation window, per seed, on the **plastic** population (Arche's claim: the distinction emerges through local learning), using the **trailing** label:
 
-> **G = BA(Real, plastic) − max(BA(Yoked, plastic), BA(sensation-only), BA(command-only))**
+> **G = BA(Real, plastic) − max(BA(Yoked, plastic), BA(Yoked, frozen), BA(sensation-only), BA(command-only))**
 
-The same statistic on the frozen population, G_frozen, is reported as a reference line ("the design can carry it"), not as the claim.
+BA(Yoked, frozen) is in the max because its weights never change, so it can't collapse: a yoked-plastic population that collapses under non-causal commands can't lower the bar. Yoked collapse flags (Section 9) are still reported as diagnostics.
+
+The frozen statistic, **G_frozen = BA(Real, frozen) − max(BA(Yoked, frozen), BA(sensation-only), BA(command-only))**, is reported as a reference line ("the design can carry it"), not as the claim.
 
 - **Sensation-only baseline:** the same frozen population fed sensations with the trace zeroed.
 - **Command-only baseline:** the same frozen population fed the trace with sensations zeroed.
@@ -100,8 +102,10 @@ The same statistic on the frozen population, G_frozen, is reported as a referenc
 ## 9. Failure-tier mapping
 
 - **Physics / channel tier:** validity gate fails, or a sanity check fails. Fix, re-run, not counted.
-- **Learning tier:** Real efference error on angle/velocity doesn't fall from first to final window; the population blows up, goes silent, or collapses (median pairwise weight cosine ≥ 0.9 after the first 5 min); or **the primary fails on the plastic population while G_frozen would pass**. The boundary claim is untested, not failed.
-  - **Direction-loss diagnostic** (from `pilots/dir.py`): f(W, d) = ‖W·d‖ / ‖W‖, with d = (trace − angular velocity)/√2 in the input order [angle, ang_vel, contact, trace], i.e. d = (0, −1, 0, 1)/√2. Report f(W_final, d) / f(W_0, d) per seed for every plastic condition (not the ablation, which has no trace input). Learning-tier flag if the ratio falls below ⟨proposed 0.5⟩. Why: P4 found the command-vs-motion direction losing weight under plasticity with no dead nodes, and P6 found the median pairwise cosine ≈ 0 in the plastic population, so the cosine check alone can't catch this failure.
+- **Learning tier:** Real efference error on angle/velocity doesn't fall from first to final window; the population blows up, goes silent, or collapses (effective-rank flag below); or **the primary fails on the plastic population while G_frozen would pass**. The boundary claim is untested, not failed.
+  - **Direction-loss diagnostic** (from `pilots/dir.py`): f(W, d) = ‖W·d‖ / ‖W‖, with d = (trace − angular velocity)/√2 in the input order [angle, ang_vel, contact, trace], i.e. d = (0, −1, 0, 1)/√2. Report f(W_final, d) / f(W_0, d) per seed for every plastic condition (not the ablation, which has no trace input). Flag a seed if the ratio falls below 0.5. Why: P4 found the command-vs-motion direction losing weight under plasticity with no dead nodes, and P6 found the median pairwise cosine ≈ 0 in the plastic population, so a cosine check can't catch this failure.
+  - **Collapse diagnostic (effective rank):** r(W) = (Σσᵢ²)² / Σσᵢ⁴ over W's singular values σᵢ (participation ratio; 1 ≤ r ≤ 4 for 16×4 W). Report r(W_final) / r(W_0) per seed for every plastic condition. Flag a seed if r(W_final) / r(W_0) < 0.65, **or** r(W_final) < 2.5 **and** r(W_final) < r(W_0). The ratio catches large relative drops (a 2D collapse from a typical init is ≈ 1.9 / 3.2 ≈ 0.6). The floor catches a 2D collapse from a low-starting init, which the ratio alone misses in ~36% of random inits; the "and below initial" guard stops a seed being flagged just for starting low (~1.6% of random inits start below 2.5). Catches both ± collapse (nodes on +v and −v, r = 1) and subspace collapse (all nodes in a 2D plane, r ≈ 2), which a pairwise cosine check misses (signed cosine is blind to ±; no pairwise check sees a shared subspace). Reference: a random dense 16×4 N(0, 0.5) init has r ≈ 3.2 (≈ 4 / (1 + 4/16); 1st percentile 2.4, 10,000 draws); a healthy run may exceed ratio 1, since Sanger's rule orthogonalises.
+  - **Per-seed rule (both diagnostics):** a seed is flagged if either diagnostic flags it in the Real plastic condition (Yoked plastic flags are reported as diagnostics only; Section 6 keeps them from affecting G); seeds are judged individually, never on the mean across seeds. If 2 or more seeds are flagged, the run is learning tier (boundary claim untested), since 4 healthy seeds are no longer possible for the primary rule (G > 0 in ≥ 4 of 5). A single flagged seed is reported but doesn't reclassify the run.
 - **Boundary tier:** validity gate holds, the population is healthy, and the primary fails on the plastic population **and** G_frozen fails too; or Secondary 4 fails.
 - **Named outcome, "encoding gap reproduced":** Secondary 5 (during motion) passes and the primary (trailing) fails. The agent compensates for its own motion but doesn't carry readable self-state once motion stops: Ye's encoding gap in this system. Boundary-tier result about spec v4.8's claim that the command trace makes the boundary legible; read it alongside the trace ablation.
 
