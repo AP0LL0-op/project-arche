@@ -110,3 +110,22 @@ Validity: external-while-commanding share of label 0 = 0.62 (0.60–0.65), ≥ 2
 - Masking also halves (k=2) or cuts by a quarter (k=3) each node's expected input drive, a second change that comes with "dense × mask".
 
 **Verdict.** No effect detectable. Sparse masking does not earn a Pymunk pilot on this evidence. Side finding: under the trailing label the dense proxy's plasticity penalty is ≈ 0 (−0.01), versus −0.13 under the during-motion label in P4; whether that holds is for the Pymunk pilots, not this proxy.
+
+## P7 — frozen pipeline check: populations and nested readouts in Pymunk (scratch script, not saved)
+
+**Setup.** Step 4c frozen pipeline: PREREG 3a seed streams, per-input normalizers with warm-up, signed command trace, 16-node leaky ReLU population (frozen), blind population W[:, :3] without the trace, delta-rule readouts predicting state + change (efference on [activity, command, 1], blind on [blind activity, 1], learning rate 1e-3). Mover p = 1/3. 5 min per run, seeds 100–104 (streams per 3a). Seed-scheme check: governed inits reproduce PREREG's effective ranks (3.21, 3.09, 3.58, 3.18, 3.02).
+
+**Health.** Normalised inputs ≈ mean 0, sd 1 (contact spikes to z ≈ 15, sparse channel). All 16 nodes alive in both populations, activity bounded (max ≈ 2.5), no NaNs.
+
+**Agency gain, angular velocity, last minute.**
+| Seed | gain, all ticks | gain, self-driven no-contact | gain, other ticks | error² share of top 1% ticks |
+|---|---|---|---|---|
+| 100 | −2.6e-4 | +2.0e-3 | −1.3e-3 | 0.93 |
+| 101 | +6.2e-4 | +1.7e-3 | −1.1e-3 | 0.95 |
+| 102 | +1.3e-4 | +1.7e-3 | −1.1e-3 | 0.95 |
+| 103 | +2.0e-4 | +3.0e-3 | −2.6e-3 | 0.96 |
+| 104 | +6.2e-4 | +2.6e-3 | −1.5e-3 | 0.92 |
+
+Angle gain ≈ ±1e-5 (all ticks); contact gain mixed sign and noisy (impacts).
+
+**Verdict.** The pipeline works and the mechanism behaves as designed on a frozen population: the command helps prediction where the agent drives and hurts it where the mover drives. The all-ticks mean hides this, so PREREG Secondary 2 is now scored on self-driven no-contact ticks, with the all-ticks and external-driven means as descriptives. Note for later: the scratch script was not saved; future pilot checks go in `pilots/`.
