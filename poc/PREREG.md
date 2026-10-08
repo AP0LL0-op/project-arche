@@ -45,12 +45,13 @@ All conditions share the same random initial weights per seed. Yoked agents rece
 | Population size | 16 |
 | Initial weights | W ~ Gaussian(0, 0.5), dense 16×4: `numpy.random.default_rng(init).normal(0, 0.5, (16, 4))`, the first draw from the init stream (3a). Effective rank of the governed inits (Section 9), computed before any run: seeds 0–4 → 3.21, 3.09, 3.58, 3.18, 3.02; none below 2.5. Dense deviates from spec v4.8 "sparsely connected". Sparsity belongs to the connection economy (out of POC scope). P6 (proxy): a sparse mask, k=2 and k=3, made no detectable difference. |
 | Activity | a(t) = 0.9·a(t−1) + 0.1·relu(W·x(t) − θ), θ = 0 for every node, no jitter. Random W breaks symmetry; θ is not needed for it. |
-| Inputs x | angle, angular velocity, contact, command trace; each normalised by running mean and variance (EMA, time constant 1,000 ticks), identical rule for all |
+| Inputs x | angle, angular velocity, contact, command trace; each normalised by running mean and variance (EMA, time constant 1,000 ticks), identical rule for all, one normaliser per input. Step size max(1/t, 1/1000): an exact cumulative average during warm-up, then the EMA, so starting values can't produce spurious early z. |
 | Command trace | τ(t) = 0.95·τ(t−1) + 0.05·command(t), signed (deviation from Ye's \|a\|, documented) |
 | Population rule | ⟨locked after pilots⟩. Pilot order: **(d) first**, then (a)–(c). (d) first: (a)'s modulator scales how much it learns, not what (P4; cf. Han 2026, arXiv:2606.30191, selection vs actuation). (d) is a selection rule. (a) error-gated Sanger's rule (baseline); (b) (a) + eligibility trace (temporal contiguity; Gerstner et al. 2018); (c) (a) + LPL-style predictive term (Halvagal & Zenke 2023); (d) sign-flipping inhibitory cancellation from command onto sensory nodes, Meng & Wang 2026–style: Hebbian on match, anti-Hebbian on mismatch. (d)'s match/mismatch threshold is a free parameter and must be fixed here before governed runs. Node perturbation remains a fallback candidate. Parked: (e) agency-gated plasticity: not piloted. Gating plasticity on a self/world signal risks making decodability true by construction. |
 | Modulator m(t) | mean over channels of (e_c / σ_c)², e_c = efference readout error on channel c, σ_c its running SD; clipped at 3 ⟨proposed⟩ |
 | Population learning rate | ⟨set from Pymunk pilots⟩ |
 | Readout | Delta rule on [activity, command], learning rate ⟨proposed 1e-3⟩ |
+| Blind model (observer) | Its own population, same initial weights with the trace column removed (W[:, :3]), same activity rule and (when plastic) same rule, fed the three normalised sensory inputs only; its readout is the efference readout minus the command input. Real and blind differ in exactly one thing, command information, so agency gain isolates it. A blind readout on the real population would not be blind: the trace reaches it through the activity. |
 
 ## 4. Ground truth and label (observer only)
 
